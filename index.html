@@ -1,0 +1,409 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شکار کلمات فضایی</title>
+
+<style>
+
+body{
+margin:0;
+font-family:tahoma;
+background:black;
+overflow:hidden;
+color:white;
+}
+
+#startScreen{
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+background:radial-gradient(circle at top,#133b7a,#000);
+}
+
+.startBox{
+background:rgba(255,255,255,0.1);
+padding:30px;
+border-radius:25px;
+box-shadow:0 0 20px #00eaff;
+width:85%;
+max-width:420px;
+}
+
+.title{
+font-size:40px;
+color:#00eaff;
+}
+
+.warning{
+background:white;
+color:red;
+padding:12px;
+border-radius:12px;
+margin:15px 0;
+font-weight:bold;
+}
+
+#studentName{
+font-size:20px;
+padding:12px;
+width:85%;
+border-radius:10px;
+border:none;
+margin-top:10px;
+}
+
+.startBtn{
+margin-top:20px;
+padding:12px 30px;
+font-size:20px;
+border:none;
+border-radius:14px;
+background:#00bfff;
+color:white;
+}
+
+#game{
+display:none;
+position:relative;
+height:100vh;
+overflow:hidden;
+}
+
+.star{
+position:absolute;
+width:2px;
+height:2px;
+background:white;
+border-radius:50%;
+animation:blinkStar 2s infinite;
+}
+
+@keyframes blinkStar{
+50%{opacity:0.2;}
+}
+
+#questionBox{
+position:absolute;
+top:15px;
+left:50%;
+transform:translateX(-50%);
+width:80%;
+text-align:center;
+border:2px solid #00bfff;
+padding:12px;
+border-radius:14px;
+background:white;
+color:black;
+font-size:20px;
+font-weight:bold;
+}
+
+#scoreBtn{
+position:absolute;
+top:80px;
+right:20px;
+font-size:18px;
+background:#00bfff;
+padding:8px 16px;
+border-radius:12px;
+color:white;
+}
+
+#rocket{
+position:absolute;
+bottom:30px;
+left:50%;
+transform:translateX(-50%);
+font-size:70px;
+}
+
+.word{
+position:absolute;
+font-size:22px;
+font-weight:bold;
+}
+
+#nextBtn{
+display:none;
+position:absolute;
+top:65%;
+left:50%;
+transform:translateX(-50%);
+font-size:20px;
+padding:10px 22px;
+border:none;
+border-radius:12px;
+background:#00bfff;
+color:white;
+}
+
+#answerBox{
+display:none;
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+color:black;
+padding:18px;
+border-radius:15px;
+font-size:20px;
+font-weight:bold;
+box-shadow:0 0 15px #00eaff;
+text-align:center;
+width:80%;
+}
+
+.blink{
+animation:blinkBox 0.8s 3;
+}
+
+@keyframes blinkBox{
+0%{opacity:1;}
+50%{opacity:0.2;}
+100%{opacity:1;}
+}
+
+#final{
+display:none;
+height:100vh;
+background:linear-gradient(#000,#041133);
+justify-content:center;
+align-items:center;
+flex-direction:column;
+}
+
+#finalBox{
+background:white;
+color:black;
+padding:30px;
+border-radius:18px;
+width:80%;
+max-width:400px;
+font-size:20px;
+box-shadow:0 0 20px #00eaff;
+text-align:center;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="startScreen">
+<div class="startBox">
+
+<h1 class="title">🚀 شکار کلمات فضایی</h1>
+<p>طراح : <b>مریم عابدی</b></p>
+
+<div class="warning">
+‼️ توجه : جواب غلط از امتیاز شما کم می کند
+</div>
+
+<input id="studentName" placeholder="نام دانش آموز">
+<br>
+<button class="startBtn" onclick="startGame()">شروع بازی</button>
+
+</div>
+</div>
+
+<div id="game">
+
+<div id="questionBox"></div>
+<div id="scoreBtn">امتیاز: 0</div>
+<div id="rocket">🛸</div>
+
+<div id="answerBox"></div>
+<button id="nextBtn" onclick="nextStage()">مرحله بعد</button>
+
+</div>
+
+<div id="final">
+<div id="finalBox">
+<div id="finalText"></div>
+<p><b>⭐ طراح : مریم عابدی ⭐</b></p>
+</div>
+</div>
+
+<script>
+
+let stages=[
+
+{root:"نظم",good:["ناظم","منظم","تنظیم","نظام","منظومه"],bad:["نظر","نور","زمین","نمک","نقش","نذر","زنگ"]},
+
+{root:"علم",good:["معلم","عالم","تعلیم","تعالیم","علیم"],bad:["قلم","سلام","علامت","اعلام","ملموس","علمی","عالمه"]},
+
+{root:"عمل",good:["اعمال","عامل","عوامل","عملیات","تعامل"],bad:["علم","عسل","کامل","امل","معلول","عمله","عالم"]},
+
+{root:"تعجب",good:["عجب","متعجب","عجیب","عجایب","اعجاب"],bad:["جواب","جعبه","عاجز","عذاب","جبین","غریب","عاجل"]},
+
+{root:"تدریس",good:["درس","دروس","مدرس","مدارس","مدرسه"],bad:["درخت","دوست","دریا","دسته","درمان","رسانه","در"]},
+
+{root:"شاعر",good:["شعر","شعرا","مشاعره","شعار","اشعار"],bad:["شهر","شکر","شغل","شانه","شهاب","شکل","شور"]}
+
+]
+
+let stage=0
+let totalScore=0
+let wordsLeft=0
+const rocket=document.getElementById("rocket")
+
+for(let i=0;i<200;i++){
+let star=document.createElement("div")
+star.className="star"
+star.style.left=Math.random()*100+"%"
+star.style.top=Math.random()*100+"%"
+document.body.appendChild(star)
+}
+
+document.addEventListener("touchmove",e=>{
+rocket.style.left=e.touches[0].clientX+"px"
+rocket.style.top=e.touches[0].clientY+"px"
+})
+
+function startGame(){
+document.getElementById("startScreen").style.display="none"
+document.getElementById("game").style.display="block"
+loadStage()
+}
+
+function loadStage(){
+
+document.getElementById("answerBox").style.display="none"
+document.getElementById("nextBtn").style.display="none"
+
+wordsLeft=12
+
+let data=stages[stage]
+
+document.getElementById("questionBox").innerText=
+"کلمات هم خانواده « "+data.root+" » را شکار کن"
+
+setTimeout(()=>{
+
+let words=[...data.good,...data.bad]
+words.sort(()=>Math.random()-0.5)
+
+words.slice(0,12).forEach((w,i)=>{
+
+setTimeout(()=>{
+createWord(w,data.good.includes(w))
+},i*2400)
+
+})
+
+},2000)
+
+}
+
+function createWord(text,isGood){
+
+let w=document.createElement("div")
+w.className="word"
+w.innerText=text
+w.style.left=Math.random()*85+"%"
+w.style.top="120px"
+
+document.body.appendChild(w)
+
+let fall=setInterval(()=>{
+
+let top=parseFloat(w.style.top)
+top+=2
+w.style.top=top+"px"
+
+let r=rocket.getBoundingClientRect()
+let wr=w.getBoundingClientRect()
+
+if(r.left<wr.right && r.right>wr.left && r.top<wr.bottom && r.bottom>wr.top){
+
+clearInterval(fall)
+
+if(isGood){w.style.color="lime";totalScore++}
+else{w.style.color="red";if(totalScore>0) totalScore--}
+
+document.getElementById("scoreBtn").innerText="امتیاز: "+totalScore
+
+wordsLeft--
+
+setTimeout(()=>{w.remove()},400)
+
+if(wordsLeft==0) endWords()
+
+}
+
+if(top>window.innerHeight){
+clearInterval(fall)
+w.remove()
+wordsLeft--
+if(wordsLeft==0) endWords()
+}
+
+},25)
+
+}
+
+function endWords(){
+
+setTimeout(()=>{
+
+let box=document.getElementById("answerBox")
+box.innerText="❌ فرصت تمام شد ❌"
+box.classList.add("blink")
+box.style.display="block"
+
+setTimeout(()=>{
+box.style.display="none"
+showAnswer()
+},2400)
+
+},3000)
+
+}
+
+function showAnswer(){
+
+let data=stages[stage]
+
+let answer=data.good.join("  ")
+
+let box=document.getElementById("answerBox")
+box.style.display="block"
+box.innerText="کلمات هم خانواده: "+answer
+
+document.getElementById("nextBtn").style.display="block"
+
+}
+
+function nextStage(){
+
+stage++
+
+if(stage>=stages.length){
+
+document.getElementById("game").style.display="none"
+document.getElementById("final").style.display="flex"
+
+let name=document.getElementById("studentName").value
+
+document.getElementById("finalText").innerHTML=
+"❤️ خداقوت فضانورد قهرمان "+name+" ❤️<br><br>"+
+"امتیاز شما: "+totalScore+" از 30"+
+"<br><br>🌸برای امتیاز بهتر می تونی دوباره تلاش کنی 😉💪🌸"
+
+return
+}
+
+loadStage()
+
+}
+
+</script>
+
+</body>
+</html>
